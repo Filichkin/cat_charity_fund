@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from sqlalchemy import Column, DateTime, Integer
+from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 
@@ -14,8 +12,6 @@ class PreBase:
         return cls.__name__.lower()
 
     id = Column(Integer, primary_key=True)
-    create_date = Column(DateTime, default=datetime.now)
-    close_date = Column(DateTime)
 
 
 Base = declarative_base(cls=PreBase)
