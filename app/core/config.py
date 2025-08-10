@@ -24,6 +24,11 @@ settings = Settings()
 
 
 class Constants:
+    AUTH_PREFIX = '/auth/jwt'
+    AUTH_TAGS = ('auth',)
+    REGISTER_PREFIX = '/auth'
+    USERS_PREFIX = '/users'
+    USERS_TAGS = ('users',)
     JWT_TOKEN_URL = 'auth/jwt/login'
     JWT_AUTH_BACKEND_NAME = 'jwt'
     NAME_MIN_LEN = 1
