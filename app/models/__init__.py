@@ -1,1 +1,1 @@
-from app.models.user import User  # noqa
+from .user import User # noqa
