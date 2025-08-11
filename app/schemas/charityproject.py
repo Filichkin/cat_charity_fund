@@ -21,9 +21,10 @@ class CharityProjectBase(BaseModel):
 class CharityProjectCreate(CharityProjectBase):
     name: str = Field(
         ...,
+        min_length=Constants.NAME_MIN_LEN,
         max_length=Constants.NAME_MAX_LEN
     )
-    description: str = Field(...)
+    description: str = Field(..., min_length=Constants.NAME_MIN_LEN)
     full_amount: PositiveInt
 
 
