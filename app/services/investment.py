@@ -60,10 +60,11 @@ class InvestmentHandler:
 
         for source in sources:
             obj_in, source = await self.distribute(obj_in, source)
-            if obj_in.fully_invested:
-                break
+            self.session.add(obj_in)
+            self.session.add(source)
 
-        await self.session.flush()
+        await self.session.commit()
+        await self.session.refresh(obj_in)
         return obj_in
 
 
@@ -90,17 +91,16 @@ class InvestmentService:
             obj_data['user_id'] = user.id
 
         db_obj = model(**obj_data)
+        if not need_for_commit and model is CharityProject:
+            db_obj.invested_amount = 0
+            db_obj.fully_invested = False
 
         self.session.add(db_obj)
-        await self.session.flush()
+        await self.session.commit()
+        await self.session.refresh(db_obj)
 
         model_in = Donation if model is CharityProject else CharityProject
-        await self.handler.perform_investment(db_obj, model_in)
-
-        if need_for_commit:
-            await self.session.commit()
-        await self.session.refresh(db_obj)
-        return db_obj
+        return await self.handler.perform_investment(db_obj, model_in)
 
     async def update_charity_project(
             self,
