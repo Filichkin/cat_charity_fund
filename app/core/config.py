@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     secret: str = 'SECRET'
     first_superuser_email: Optional[EmailStr] = None
     first_superuser_password: Optional[str] = None
-    jwt_token_lifetime: int
-    user_password_min_len: int
+    jwt_token_lifetime: int = 3600
+    user_password_min_len: int = 4
     logging_format: str = '%(asctime)s - %(levelname)s - %(message)s'
     logging_dt_format: str = '%Y-%m-%d %H:%M:%S'
 
