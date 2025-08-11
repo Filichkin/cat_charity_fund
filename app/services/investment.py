@@ -10,9 +10,9 @@ from app.services.validators import (
     check_charity_project_is_open,
     check_new_full_amount
 )
-from app.crud.charityproject import charity_project_crud
+from app.crud.charity_project import charity_project_crud
 from app.models import BaseInvestModel, CharityProject, Donation, User
-from app.schemas.charityproject import CharityProjectDB, CharityProjectUpdate
+from app.schemas.charity_project import CharityProjectDB, CharityProjectUpdate
 
 
 class InvestmentHandler:
