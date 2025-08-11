@@ -70,7 +70,6 @@ cd cat_charity_fund
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-venv\Scriptsctivate     # Windows
 ```
 
 ### 3. Установить зависимости
