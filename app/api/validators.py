@@ -21,3 +21,16 @@ async def get_project_or_404(
             detail=Messages.PROJECT_NOT_FOUND
         )
     return charity_project
+
+
+async def check_name_duplicate(
+    project_name: str,
+    session: AsyncSession
+) -> None:
+    if await charity_project_crud.get_by_attribute(
+        'name', project_name, session
+    ) is not None:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=Messages.PROJECT_NAME_OCCUPIED
+        )

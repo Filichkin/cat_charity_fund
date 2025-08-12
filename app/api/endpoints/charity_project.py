@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.validators import get_project_or_404
+from app.api.validators import check_name_duplicate, get_project_or_404
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
-from app.models import CharityProject
+from app.crud.donation import donation_crud
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
     CharityProjectUpdate
 )
-from app.services.investment import InvestmentService
+from app.services.invest import investment
 
 
 router = APIRouter()
@@ -29,8 +29,17 @@ async def create_new_charity_project(
 ):
     """Only for superusers"""
 
-    invest_object = InvestmentService(session)
-    return await invest_object.create_object(charity_project, CharityProject)
+    await check_name_duplicate(charity_project.name, session)
+    new_project = await charity_project_crud.create(
+        charity_project, session, commit=False
+    )
+    session.add_all(investment(
+        new_project,
+        await donation_crud.get_not_fully_invested(session)
+    ))
+    await session.commit()
+    await session.refresh(new_project)
+    return new_project
 
 
 @router.get(
@@ -60,8 +69,7 @@ async def partially_update_charity_project(
     """Only for superusers"""
 
     charity_project = await get_project_or_404(project_id, session)
-    new_project = InvestmentService(session)
-    return await new_project.update_charity_project(charity_project, obj_in)
+    return await charity_project_crud.update(charity_project, obj_in, session)
 
 
 @router.delete(
@@ -77,5 +85,4 @@ async def remove_charity_project(
     """Only for superusers"""
 
     charity_project = await get_project_or_404(project_id, session)
-    project = InvestmentService(session)
-    return await project.remove_charity_project(charity_project)
+    return await charity_project_crud.remove(charity_project, session)

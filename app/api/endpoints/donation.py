@@ -3,14 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
+from app.crud.charity_project import charity_project_crud
 from app.crud.donation import donation_crud
-from app.models import Donation, User
+from app.models import User
 from app.schemas.donation import (
     DonationCreate,
     DonationFullDB,
     DonationShortDB
 )
-from app.services.investment import InvestmentService
+from app.services.invest import investment
 
 
 router = APIRouter()
@@ -28,13 +29,16 @@ async def create_new_donation(
 ):
     """Only for registered users"""
 
-    invest_object = InvestmentService(session)
-    return await invest_object.create_object(
-        donation,
-        Donation,
-        user,
-        need_for_commit=False
+    new_donation = await donation_crud.create(
+        donation, session, user, commit=False
     )
+    session.add_all(investment(
+        new_donation,
+        await charity_project_crud.get_not_fully_invested(session)
+    ))
+    await session.commit()
+    await session.refresh(new_donation)
+    return new_donation
 
 
 @router.get(
