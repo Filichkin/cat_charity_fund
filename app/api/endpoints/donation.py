@@ -11,7 +11,7 @@ from app.schemas.donation import (
     DonationFullDB,
     DonationShortDB
 )
-from app.services.invest import investment
+from app.services.investment import investment
 
 
 router = APIRouter()
