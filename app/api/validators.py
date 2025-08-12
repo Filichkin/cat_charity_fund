@@ -34,3 +34,16 @@ async def check_name_duplicate(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=Messages.PROJECT_NAME_OCCUPIED
         )
+
+
+async def check_charity_project_before_delete(
+    project_id: int,
+    session: AsyncSession
+) -> CharityProject:
+    charity_project = await get_project_or_404(project_id, session)
+    if charity_project.invested_amount > 0 or charity_project.fully_invested:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=Messages.PROJECT_INVESTED
+        )
+    return charity_project

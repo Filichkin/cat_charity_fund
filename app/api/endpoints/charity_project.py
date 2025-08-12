@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.validators import check_name_duplicate, get_project_or_404
+from app.api.validators import (
+    check_charity_project_before_delete,
+    check_name_duplicate,
+    get_project_or_404
+)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
@@ -84,5 +88,6 @@ async def remove_charity_project(
 ):
     """Only for superusers"""
 
-    charity_project = await get_project_or_404(project_id, session)
-    return await charity_project_crud.remove(charity_project, session)
+    return await charity_project_crud.remove(
+        await check_charity_project_before_delete(project_id, session), session
+    )
