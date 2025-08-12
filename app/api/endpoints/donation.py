@@ -30,15 +30,14 @@ async def create_new_donation(
     """Only for registered users"""
 
     new_donation = await donation_crud.create(
-        donation, session, user, commit=False
+        donation, session, user
     )
-    session.add_all(investment(
+    charity_projects_to_update = investment(
         new_donation,
         await charity_project_crud.get_not_fully_invested(session)
-    ))
-    await session.commit()
-    await session.refresh(new_donation)
-    return new_donation
+    )
+    await donation_crud.update_multi(charity_projects_to_update, session)
+    return await donation_crud.refresh(new_donation, session)
 
 
 @router.get(

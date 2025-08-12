@@ -35,15 +35,14 @@ async def create_new_charity_project(
 
     await check_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(
-        charity_project, session, commit=False
+        charity_project, session
     )
-    session.add_all(investment(
+    modified_objects = investment(
         new_project,
         await donation_crud.get_not_fully_invested(session)
-    ))
-    await session.commit()
-    await session.refresh(new_project)
-    return new_project
+    )
+    await charity_project_crud.update_multi(modified_objects, session)
+    return await charity_project_crud.refresh(new_project, session)
 
 
 @router.get(

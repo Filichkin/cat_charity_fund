@@ -49,7 +49,7 @@ class CRUDBase:
             obj_in,
             session: AsyncSession,
             user: Optional[User] = None,
-            commit: bool = True
+            # commit: bool = True
     ):
         obj_in_data = obj_in.dict()
         if user is not None:
@@ -58,9 +58,11 @@ class CRUDBase:
         if db_obj.invested_amount is None:
             db_obj.invested_amount = 0
         session.add(db_obj)
-        if commit:
-            await session.commit()
-            await session.refresh(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        # if commit:
+        #     await session.commit()
+        #     await session.refresh(db_obj)
         return db_obj
 
     async def update(
@@ -108,3 +110,23 @@ class CRUDBase:
             select(self.model).where(self.model.user_id == user.id)
         )
         return donations.scalars().all()
+
+    async def refresh(
+            self,
+            db_obj,
+            session: AsyncSession,
+    ):
+        await session.refresh(db_obj)
+        return db_obj
+
+    async def update_multi(
+            self,
+            db_objs,
+            session: AsyncSession,
+    ):
+        for db_obj in db_objs:
+            session.add(db_obj)
+        await session.commit()
+        for db_obj in db_objs:
+            await session.refresh(db_obj)
+        return db_objs
