@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.charity_project import charity_project_crud
 from app.core.config import Messages
 from app.models import CharityProject
+from app.schemas.charity_project import CharityProjectUpdate
 
 
 async def get_project_or_404(
@@ -46,4 +47,26 @@ async def check_charity_project_before_delete(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=Messages.PROJECT_INVESTED
         )
+    return charity_project
+
+
+async def check_charity_project_before_edit(
+    project_id: int,
+    obj_in: CharityProjectUpdate,
+    session: AsyncSession,
+) -> CharityProject:
+    charity_project = await get_project_or_404(project_id, session)
+    if charity_project.fully_invested:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=Messages.PROJECT_CLOSED
+        )
+    if obj_in.full_amount is not None:
+        if obj_in.full_amount < charity_project.invested_amount:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=Messages.PROJECT_AMOUNTS_ERROR
+            )
+    if obj_in.name is not None:
+        await check_name_duplicate(obj_in.name, session)
     return charity_project
